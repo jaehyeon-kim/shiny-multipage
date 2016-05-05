@@ -34,8 +34,8 @@ server <- function(input, output, session) {
       output$login_more <- renderUI({
         list(
           hr(),
-          actionButton("login_profile", "Profile", icon = icon("arrow-left"), width = "100px"),
-          actionButton("login_application", "Application", icon = icon("arrow-right"), width = "110px")
+          actionButton("login_profile", "Profile", icon = icon("edit"), width = "100px"),
+          actionButton("login_application", "Application", icon = icon("bar-chart"), width = "110px")
         )
       })
     }

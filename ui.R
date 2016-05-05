@@ -2,8 +2,9 @@ ui_login <- function(...) {
   args <- list(...)
   fluidRow(
     useShinyjs(),
-    tags$head(tags$style(HTML(".container-fluid {margin: 25px;}"))),
-    tags$script('$(document).keyup(function(event) { if (event.keyCode == 13) { $("#login_login").click(); }});'),
+    tags$head(tags$style(HTML(".container-fluid {margin: 25px;} #login_login {color: #006600;} #login_application {color: #0000ff;}"))),
+    tags$script('$(document).keyup(function(event) { if (event.keyCode == 13) { if($("#login_application").length) { $("#login_application").click(); } else { $("#login_login").click();}}});'),
+    tags$script('$("#login_username").focus();'),
     column(3, offset = 4,
            wellPanel(
              h4("LOGIN"),
@@ -36,8 +37,9 @@ ui_register <- function(...) {
   args <- list(...)
   fluidRow(
     useShinyjs(),
-    tags$head(tags$style(HTML(".container-fluid {margin: 25px;} #register_link {float:right;}"))),
+    tags$head(tags$style(HTML(".container-fluid {margin: 25px;} #register_link {float:right;} #register_register {color: #FF6633;}"))),
     tags$script('$(document).keyup(function(event) { if (event.keyCode == 13) { $("#register_register").click(); }});'),
+    tags$script('$("#register_username").focus();'),
     column(3, offset = 4,
            wellPanel(
              div(id = "register_link",
@@ -60,13 +62,14 @@ ui_profile <- function(...) {
   args <- list(...)
   fluidRow(
     useShinyjs(),
-    tags$head(tags$style(HTML(".container-fluid {margin: 25px;} #profile_link {float:right;}"))),
+    tags$head(tags$style(HTML(".container-fluid {margin: 25px;} #profile_link {float:right;} #profile_password_ch {color: #CC0033;}"))),
     tags$script('$(document).keyup(function(event) { if (event.keyCode == 13) { $("#profile_password_ch").click(); }});'),
+    tags$script('$("#profile_password").focus();'),
     column(3, offset = 4,
            wellPanel(
              div(id = "profile_link",
                  actionButton("profile_logout", "Log out", icon = icon("sign-out"), width = "100px"),
-                 actionButton("profile_application", "Application", icon = icon("arrow-right"), width = "110px")
+                 actionButton("profile_application", "Application", icon = icon("bar-chart"), width = "110px")
              ),
              br(),
              br(),
@@ -92,7 +95,7 @@ ui_application <- function(...) {
                  ),
              div(id = "application_link",
                  actionButton("application_logout", "Log out", icon = icon("sign-out"), width = "100px"),
-                 actionButton("application_profile", "Profile", icon = icon("arrow-right"), width = "100px")
+                 actionButton("application_profile", "Profile", icon = icon("edit"), width = "100px")
              ),
              titlePanel("Old Faithful Geyser Data"),
              sidebarLayout(
