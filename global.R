@@ -4,6 +4,7 @@
 #library(Rcpp)
 #library(shinyStore)
 library(shiny)
+library(shinyjs)
 library(shinythemes)
 
 source("ui.R")

@@ -10,69 +10,101 @@ render_page <- function(..., f, title = "multipage demo", theme = shinytheme("ce
 }
 
 server <- function(input, output, session) {
+  ## authentication
   user_info <- reactiveValues(is_logged = is_logged)
   
-  observe({ 
-    if (!user_info$is_logged) {
-      if (!is.null(input$login_login)) {
-        # observeEvent equivalent
-        if(input$login_login > 0) {
-          username <- isolate(input$login_username)
-          password <- isolate(input$login_password)
-          is_same_username <- auth_username == username
-          is_same_password <- auth_password == password
-          if (is_same_username & is_same_password) {
-            user_info$is_logged <- TRUE
-            user_info$username <- input$login_username
-          }
-        }
+  tryCatch({
+    observeEvent(input$login_login, {
+      username <- isolate(input$login_username)
+      password <- isolate(input$login_password)
+      is_same_username <- auth_username == username
+      is_same_password <- auth_password == password
+      if (is_same_username & is_same_password) {
+        user_info$is_logged <- TRUE
+        user_info$username <- input$login_username
       }
+    })
+  }, error = function(err) 0)
+  
+  ## add profile, application buttons when logged in
+  observe({
+    if(user_info$is_logged) {
+      shinyjs::disable("login_username")
+      shinyjs::disable("login_password")
+      output$login_more <- renderUI({
+        list(
+          hr(),
+          actionButton("login_profile", "Profile", icon = icon("arrow-left"), width = "100px"),
+          actionButton("login_application", "Application", icon = icon("arrow-right"), width = "110px")
+        )
+      })
     }
   })
   
   ## render default login page
-  observe({
-    if(!user_info$is_logged) {
+  output$page <- render_page(f = ui_login)
+  
+  ## render a different page from login page - register, profile, application
+  tryCatch({
+    observeEvent(input$login_register, {
+      output$page <- render_page(f = ui_register)
+    })
+  }, error = function(err) 0)
+  
+  tryCatch({
+    observeEvent(input$login_profile, {
+      output$page <- render_page(f = ui_profile)
+    })
+  }, error = function(err) 0)
+  
+  tryCatch({
+    observeEvent(input$login_application, {
+      output$page <- render_page(username = isolate(user_info$username), f = ui_application)
+    })
+  }, error = function(err) 0)
+  
+  ## render a different page from register page - login
+  tryCatch({
+    observeEvent(input$register_login, {
       output$page <- render_page(f = ui_login)
-    }
-  })
+    })
+  }, error = function(err) 0)
   
-  ## render a different page from login page
-  observe({
-    if(!is.null(input$login_login) && input$login_login > 0) {
-      if(user_info$is_logged) {
-        output$page <- render_page(username = isolate(user_info$username), f = ui_main)
-      } else {
-        ### you're not logged in
-      }
-    }
-    
-#     if(!is.null(input$login_login) && input$login_profile > 0) {
-#       output$page <- render_page(f = ui_profile)
-#     }
-    
-    if(!is.null(input$login_login) && input$login_register > 0) {
-      if(!user_info$is_logged) {
-        output$page <- render_page(f = ui_register)
-      } else {
-        ### you've already registered
-      }
-    }
-  })
+  ## render a different page from profile - logout, application
+  tryCatch({
+    observeEvent(input$profile_logout, {
+      output$page <- render_page(f = ui_logout)
+    })
+  }, error = function(err) 0)
   
-  ## render a different page from register page
-  observe({
-    if(!is.null(input$register_login) && input$register_login > 0) {
-      output$page <- render_page(f = ui_login)
-    }
-  })
+  tryCatch({
+    observeEvent(input$profile_application, {
+      output$page <- render_page(username = isolate(user_info$username), f = ui_application)
+    })
+  }, error = function(err) 0)
   
-  ## render a different page from main page
-  observe({
-    if(!is.null(input$main_login)) {
-      if(input$main_login > 0) {
-        output$page <- render_page(f = ui_login)
-      }
-    }
+  ## render a different page from application - logout, profile
+  tryCatch({
+    observeEvent(input$application_logout, {
+      output$page <- render_page(f = ui_logout)
+    })
+  }, error = function(err) 0)
+  
+  tryCatch({
+    observeEvent(input$application_profile, {
+      output$page <- render_page(f = ui_profile)
+    })
+  }, error = function(err) 0)
+  
+  ## render plot
+  tryCatch({
+    output$distPlot <- renderPlot({
+      # generate bins based on input$bins from ui.R
+      x    <- faithful[, 2]
+      bins <- seq(min(x), max(x), length.out = input$bins + 1)
+      
+      # draw the histogram with the specified number of bins
+      hist(x, breaks = bins, col = 'darkgray', border = 'white')
+    })
   })
 }
