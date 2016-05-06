@@ -44,7 +44,7 @@ ui_register <- function(...) {
     column(3, offset = 4,
            wellPanel(
              div(id = "register_link",
-                 actionButton("register_login", "Log in", icon = icon("arrow-left"), width = "100px")
+                 actionButton("register_login", "Log in", icon = icon("sign-in"), width = "100px")
              ),
              br(),
              br(),
