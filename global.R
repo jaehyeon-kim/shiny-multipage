@@ -1,12 +1,10 @@
-#install.packages(c("Rcpp", "PKI"))
-#devtools::install_github("trestletech/shinyStore")
-
-#library(Rcpp)
-#library(shinyStore)
+library(sqldf)
+library(bcrypt)
 library(shiny)
 library(shinyjs)
 library(shinythemes)
 
+source("utils.R")
 source("ui.R")
 source("server.R")
 shinyApp(ui, server)

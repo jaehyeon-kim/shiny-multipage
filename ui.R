@@ -2,6 +2,7 @@ ui_login <- function(...) {
   args <- list(...)
   fluidRow(
     useShinyjs(),
+    #css hex color - http://www.w3schools.com/cssref/css_colors.asp
     tags$head(tags$style(HTML(".container-fluid {margin: 25px;} #login_login {color: #006600;} #login_application {color: #0000ff;}"))),
     tags$script('$(document).keyup(function(event) { if (event.keyCode == 13) { if($("#login_application").length) { $("#login_application").click(); } else { $("#login_login").click();}}});'),
     tags$script('$("#login_username").focus();'),

@@ -1,8 +1,11 @@
+init_users()
+
+app_name <- "multipage demo"
 is_logged <- FALSE
 auth_username <- "admin"
 auth_password <- "admin"
 
-render_page <- function(..., f, title = "multipage demo", theme = shinytheme("cerulean")) {
+render_page <- function(..., f, title = app_name, theme = shinytheme("cerulean")) {
   page <- f(...)
   renderUI({
     div(class = "outer", fluidPage(page, title = title, theme = theme))
@@ -17,12 +20,16 @@ server <- function(input, output, session) {
     observeEvent(input$login_login, {
       username <- isolate(input$login_username)
       password <- isolate(input$login_password)
-      is_same_username <- auth_username == username
-      is_same_password <- auth_password == password
-      if (is_same_username & is_same_password) {
+      
+      is_valid_credentials <- check_login_credentials(username = username, password = password, app_name = app_name)
+      if(is_valid_credentials) {
         user_info$is_logged <- TRUE
-        user_info$username <- input$login_username
+        user_info$username <- username
       }
+      
+      log_session(username = username, is_in = 1, app_name = app_name)
+      
+      1
     })
   }, error = function(err) 0)
   
@@ -74,6 +81,7 @@ server <- function(input, output, session) {
   tryCatch({
     observeEvent(input$profile_logout, {
       output$page <- render_page(f = ui_logout)
+      log_session(username = user_info$username, is_in = 0, app_name = app_name)
     })
   }, error = function(err) 0)
   
@@ -87,6 +95,7 @@ server <- function(input, output, session) {
   tryCatch({
     observeEvent(input$application_logout, {
       output$page <- render_page(f = ui_logout)
+      log_session(username = user_info$username, is_in = 0, app_name = app_name)
     })
   }, error = function(err) 0)
   
