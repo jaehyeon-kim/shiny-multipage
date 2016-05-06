@@ -82,6 +82,7 @@ server <- function(input, output, session) {
     observeEvent(input$profile_logout, {
       output$page <- render_page(f = ui_logout)
       log_session(username = user_info$username, is_in = 0, app_name = app_name)
+      stopApp(returnValue = 1)
     })
   }, error = function(err) 0)
   
@@ -96,6 +97,7 @@ server <- function(input, output, session) {
     observeEvent(input$application_logout, {
       output$page <- render_page(f = ui_logout)
       log_session(username = user_info$username, is_in = 0, app_name = app_name)
+      stopApp(returnValue = 1)
     })
   }, error = function(err) 0)
   
