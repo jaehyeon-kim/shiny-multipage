@@ -4,11 +4,12 @@ app_name <- "multipage demo"
 is_logged <- FALSE
 auth_username <- "admin"
 auth_password <- "admin"
+app_key <- "app_key"
 
 render_page <- function(..., f, title = app_name, theme = shinytheme("cerulean")) {
   page <- f(...)
   renderUI({
-    div(class = "outer", fluidPage(page, title = title, theme = theme))
+    fluidPage(page, title = title, theme = theme)
   })
 }
 
