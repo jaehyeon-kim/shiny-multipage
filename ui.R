@@ -27,7 +27,7 @@ ui_logout <- function(...) {
     column(3, offset = 4,
            wellPanel(
              div(id = "logout_message",
-                 h4("You are logged out now!")
+                 h4(args$message)
                  )
            )
     )
@@ -39,6 +39,7 @@ ui_register <- function(...) {
   fluidRow(
     useShinyjs(),
     tags$head(tags$style(HTML(".container-fluid {margin: 25px;} #register_link {float:right;} #register_register {color: #FF6633;}"))),
+    tags$head(tags$style(HTML(".input_msg {color: #FF9999;} .input_success {color: #339900;} .input_fail {color: #CC0033;} "))),
     tags$script('$(document).keyup(function(event) { if (event.keyCode == 13) { $("#register_register").click(); }});'),
     tags$script('$("#register_username").focus();'),
     column(3, offset = 4,
@@ -50,10 +51,17 @@ ui_register <- function(...) {
              br(),
              h4("REGISTER"),
              textInput("register_username", "User name"),
+             div(class = "input_msg", textOutput("register_username_msg")),
              passwordInput("register_password", "Password"),
+             div(class = "input_msg", textOutput("register_password_msg")),
              passwordInput("register_password_re", "Re-enter password"),
-             textInput("register_key", "Application key"),
-             actionButton("register_register", "Register", icon = icon("user-plus"), width = "100px")
+             div(class = "input_msg", textOutput("register_password_re_msg")),
+             textInput("register_app_key", "Application key"),
+             div(class = "input_msg", textOutput("register_app_key_msg")),
+             actionButton("register_register", "Register", icon = icon("user-plus"), width = "100px"),
+             br(),
+             div(class = "input_success", textOutput("register_success")),
+             div(class = "input_fail", textOutput("register_fail"))
            )
     )
   )
@@ -77,7 +85,8 @@ ui_profile <- function(...) {
              h4("PROFILE"),
              textInput("profile_username", "User name"),
              passwordInput("profile_password", "Password"),
-             passwordInput("profile_password_re", "Re-enter password"),
+             passwordInput("profile_password_new", "New password"),
+             passwordInput("profile_password_new_re", "Re-enter new password"),
              actionButton("profile_password_ch", "Change password", icon = icon("exclamation"), width = "150px")
            )
     )
