@@ -67,20 +67,26 @@ get_query <- function(conn = NULL, db_name = NULL, query, to_disconnect = FALSE,
 
 ## query generating functions
 set_select_qry <- function(schema = NULL, tbl, what = list("*"), filter_list = list()) {
-  if(what[[1]] == '*') {
-    what <- '*'
+  if(what[[1]] == "*") {
+    what <- "*"
   } else {
-    what <- gsub("'", '', paste(what, collapse = ", "))
+    what <- gsub("'", "", paste(what, collapse = ", "))
   }
   
   filter_chunk <- if(length(filter_list) > 0) paste("WHERE", concat_rec(filter_list)) else ""
   
-  paste('SELECT', what, 'FROM', paste(c(schema, tbl), collapse = "."), filter_chunk,';')  
+  paste("SELECT", what, "FROM", paste(c(schema, tbl), collapse = "."), filter_chunk, ";")  
+}
+
+set_delete_qry <- function(schema = NULL, tbl, filter_list = list()) {
+  filter_chunk <- if(length(filter_list) > 0) paste("WHERE", concat_rec(filter_list)) else ""
+  
+  paste("DELETE FROM", paste(c(schema, tbl), collapse = "."), filter_chunk, ";")
 }
 
 set_insert_qry <- function(schema = NULL, tbl, rec) {
-  paste('INSERT INTO', paste(c(schema, tbl), collapse = "."), '(', concat_rec(rec, outer_collapse = ',', target = 'name'), ')',
-        'VALUES', '(', concat_rec(rec, outer_collapse = ',', target = 'value'), ');')
+  paste("INSERT INTO", paste(c(schema, tbl), collapse = "."), "(", concat_rec(rec, outer_collapse = ",", target = "name"), ")",
+        "VALUES", "(", concat_rec(rec, outer_collapse = ",", target = "value"), ");")
 }
 
 set_insert_qry_apply <- function(f, recs, trans = FALSE, ...) {
@@ -93,12 +99,12 @@ set_insert_qry_apply <- function(f, recs, trans = FALSE, ...) {
       rec <- lapply(as.list(recs[x,]), as.character)
       f(..., rec = rec)
     })
-    qry <- paste(unlist(lst), collapse = ' ')    
+    qry <- paste(unlist(lst), collapse = " ")    
   } else {
-    qry <- ''
+    qry <- ""
   }
   
-  if(trans) paste('BEGIN TRANSACTION;', qry, 'END TRANSACTION;') else qry
+  if(trans) paste("BEGIN TRANSACTION;", qry, "END TRANSACTION;") else qry
 }
 
 concat_rec <- function(rec, inner_collapse = "=", outer_collapse = "AND", target = "both") {
