@@ -94,7 +94,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$login_leave, {
     output$page <- render_page(message = "Application is closed now!", f = ui_logout)
-    stopApp(returnValue = 1)
+    #stopApp(returnValue = 1)
   })
   
   ## render a different page from register page - login
@@ -106,14 +106,14 @@ server <- function(input, output, session) {
   
   observeEvent(input$register_leave, {
     output$page <- render_page(message = "Application is closed now!", f = ui_logout)
-    stopApp(returnValue = 1)
+    #stopApp(returnValue = 1)
   })
   
   ## render a different page from profile - logout, application
   observeEvent(input$profile_logout, {
     output$page <- render_page(message = "You are logged out now!", f = ui_logout)
     log_session(username = user_info$username, is_in = 0, app_name = app_name)
-    stopApp(returnValue = 1)
+    #stopApp(returnValue = 1)
   })
   
   observeEvent(input$profile_application, {
@@ -124,7 +124,7 @@ server <- function(input, output, session) {
   observeEvent(input$application_logout, {
     output$page <- render_page(message = "You are logged out now!", f = ui_logout)
     log_session(username = user_info$username, is_in = 0, app_name = app_name)
-    stopApp(returnValue = 1)
+    #stopApp(returnValue = 1)
   })
   
   observeEvent(input$application_profile, {
