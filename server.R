@@ -166,24 +166,32 @@ server <- function(input, output, session) {
     
     withProgress(message = "Processing", detail = "Credentials are validated...", value = 0, {
       if(!any(username == "", password == "", password_re == "", app_key == "")) {
-        is_registerable <- check_registration_info(username = username, password = NULL, app_key = app_key, app_name = app_name, conn = NULL, to_disconnect = TRUE, verbose = FALSE)
-        if(password != password_re) {
+        password_cond <- check_password(password)
+        password_re_cond <- check_password(password_re)
+        if(!all(unlist(password_cond))) {
+          output$register_fail <- renderText(paste("Check 1st password", message_password(password)))
+        } else if(!all(unlist(password_re_cond))) {
+          output$register_fail <- renderText(paste("Check 2nd password", message_password(password_re)))
+        } else if(password != password_re){
           output$register_fail <- renderText("Enter same password")
-        } else if(!is_registerable$app_key_pass) {
-          output$register_fail <- renderText("App key doesn't match")
-        } else if(!is_registerable$user_not_found) {
-          output$register_fail <- renderText("Same user name exists")
         } else {
-          is_registered <- register_user(username = username, password = password, password_re = password_re, app_key = app_key, app_name = app_name, conn = NULL, to_disconnect = TRUE, verbose = FALSE)
-          if(is_registered) {
-            output$register_fail <- renderText("")
-            output$register_success <- renderText("Registration succeeded")
-
-            Sys.sleep(1)
-            output$page <- render_page(f = ui_login)
+          is_registerable <- check_registration_info(username = username, password = NULL, app_key = app_key, app_name = app_name, conn = NULL, to_disconnect = TRUE, verbose = FALSE)
+          if(!is_registerable$app_key_pass) {
+            output$register_fail <- renderText("App key doesn't match")
+          } else if(!is_registerable$user_not_found) {
+            output$register_fail <- renderText("Same user name exists")
           } else {
-            output$register_success <- renderText("")
-            output$register_fail <- renderText("Registration failed, try again or contact admin")
+            is_registered <- register_user(username = username, password = password, password_re = password_re, app_key = app_key, app_name = app_name, conn = NULL, to_disconnect = TRUE, verbose = FALSE)
+            if(is_registered) {
+              output$register_fail <- renderText("")
+              output$register_success <- renderText("Registration succeeded")
+              
+              Sys.sleep(1)
+              output$page <- render_page(f = ui_login)
+            } else {
+              output$register_success <- renderText("")
+              output$register_fail <- renderText("Registration failed, try again or contact admin")
+            }
           }
         }
       }

@@ -1,6 +1,7 @@
 library(sqldf)
 library(bcrypt)
 library(shiny)
+library(shinyBS)
 library(shinyjs)
 library(shinythemes)
 

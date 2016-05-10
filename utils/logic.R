@@ -91,5 +91,27 @@ get_password <- function(username, app_name, conn = NULL, to_disconnect = TRUE, 
   get_query(conn = conn, db_name = "db.sqlite", query = qry_select_pw, to_disconnect = to_disconnect, verbose = verbose)$rs$password
 }
 
+check_password <- function(password) {
+  cond <- list(has_enough_len = FALSE, has_numeric = FALSE, has_character = FALSE)
+  
+  if(nchar(password) >= 8) cond$has_enough_len <- TRUE
+  if(grepl("[0-9]", password)) cond$has_numeric <- TRUE
+  if(grepl("[a-zA-Z]", password)) cond$has_character <- TRUE
+  
+  cond
+}
+
+message_password <- function(password) {
+  cond <- check_password(password)
+  msg <- ""
+  if(!all(unlist(cond))) {
+    msg <- if(!cond$has_enough_len) paste(msg, "too short?") else msg
+    msg <- if(!cond$has_numeric) paste(msg, "no number?") else msg
+    msg <- if(!cond$has_character) paste(msg, "no letter?") else msg
+  }
+
+  msg
+}
+
 
 
