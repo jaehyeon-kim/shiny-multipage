@@ -33,7 +33,7 @@ ui_logout <- function(...) {
   args <- list(...)
   fluidRow(
     useShinyjs(),
-    tags$head(tags$style(HTML(".container-fluid {margin: 25px;} #logout_message {text-align: center;}"))),
+    tags$head(tags$style(HTML(".container-fluid {margin: 150px;} #logout_message {text-align: center;}"))),
     column(3, offset = 4,
            wellPanel(
              div(id = "logout_message",
