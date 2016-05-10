@@ -19,23 +19,38 @@ server <- function(input, output, session) {
   ######################################################
   user_info <- reactiveValues(is_logged = is_logged)
   
-  tryCatch({
-    observeEvent(input$login_login, {
-      username <- isolate(input$login_username)
-      password <- isolate(input$login_password)
+  observe({
+    if(!is.null(input$login_login)) {
+      username <- input$login_username
+      password <- input$login_password
       
+      if(username != "") output$login_username_msg <- renderText("")
+      if(password != "") output$login_password_msg <- renderText("")
+    }
+  })
+  
+  observeEvent(input$login_login, {
+    username <- isolate(input$login_username)
+    password <- isolate(input$login_password)
+    
+    if(username == "") output$login_username_msg <- renderText("Please enter user name")
+    if(password == "") output$login_password_msg <- renderText("Please enter password")
+    
+    if(!any(username == "", password == "")) {
       is_valid_credentials <- check_login_credentials(username = username, password = password, app_name = app_name)
       if(is_valid_credentials) {
         user_info$is_logged <- TRUE
         user_info$username <- username
+        
+        output$login_fail <- renderText("")
+        
+        log_session(username = username, is_in = 1, app_name = app_name)
+      } else {
+        output$login_fail <- renderText("Login failed, try again or contact admin")
       }
-      
-      log_session(username = username, is_in = 1, app_name = app_name)
-      
-      1
-    })
-  }, error = function(err) 0)
-  
+    }
+  })
+
   ###############################################################
   ################### Render Pages/UI Element ###################
   ###############################################################
@@ -48,7 +63,7 @@ server <- function(input, output, session) {
         list(
           hr(),
           actionButton("login_profile", "Profile", icon = icon("edit"), width = "100px"),
-          actionButton("login_application", "Application", icon = icon("bar-chart"), width = "110px")
+          actionButton("login_application", "App", icon = icon("bar-chart"), width = "100px")
         )
       })
     }
@@ -57,64 +72,68 @@ server <- function(input, output, session) {
   ## render default login page
   output$page <- render_page(f = ui_login)
   
-  ## render a different page from login page - register, profile, application
-  tryCatch({
-    observeEvent(input$login_register, {
-      output$page <- render_page(f = ui_register)
-      
-      output$register_success <- renderText("")
-      output$register_fail <- renderText("")
-    })
-  }, error = function(err) 0)
+  ## render a different page from login page - register, profile, application, leave
+  observeEvent(input$login_register, {
+    output$page <- render_page(f = ui_register)
+    
+    output$register_success <- renderText("")
+    output$register_fail <- renderText("")
+  })
+
+  observeEvent(input$login_profile, {
+    output$page <- render_page(f = ui_profile)
+    
+    output$profile_fail <- renderText("")
+    output$profile_success <- renderText("")
+    updateTextInput(session, "profile_username", "User name", user_info$username)
+  })
   
-  tryCatch({
-    observeEvent(input$login_profile, {
-      output$page <- render_page(f = ui_profile)
-    })
-  }, error = function(err) 0)
+  observeEvent(input$login_application, {
+    output$page <- render_page(username = isolate(user_info$username), f = ui_application)
+  })
   
-  tryCatch({
-    observeEvent(input$login_application, {
-      output$page <- render_page(username = isolate(user_info$username), f = ui_application)
-    })
-  }, error = function(err) 0)
+  observeEvent(input$login_leave, {
+    output$page <- render_page(message = "Application is closed now!", f = ui_logout)
+    stopApp(returnValue = 1)
+  })
   
   ## render a different page from register page - login
-  tryCatch({
-    observeEvent(input$register_login, {
-      output$page <- render_page(f = ui_login)
-    })
-  }, error = function(err) 0)
+  observeEvent(input$register_login, {
+    output$page <- render_page(f = ui_login)
+    
+    output$login_fail <- renderText("")
+  })
+  
+  observeEvent(input$register_leave, {
+    output$page <- render_page(message = "Application is closed now!", f = ui_logout)
+    stopApp(returnValue = 1)
+  })
   
   ## render a different page from profile - logout, application
-  tryCatch({
-    observeEvent(input$profile_logout, {
-      output$page <- render_page(message = "You are logged out now!", f = ui_logout)
-      log_session(username = user_info$username, is_in = 0, app_name = app_name)
-      stopApp(returnValue = 1)
-    })
-  }, error = function(err) 0)
+  observeEvent(input$profile_logout, {
+    output$page <- render_page(message = "You are logged out now!", f = ui_logout)
+    log_session(username = user_info$username, is_in = 0, app_name = app_name)
+    stopApp(returnValue = 1)
+  })
   
-  tryCatch({
-    observeEvent(input$profile_application, {
-      output$page <- render_page(username = isolate(user_info$username), f = ui_application)
-    })
-  }, error = function(err) 0)
+  observeEvent(input$profile_application, {
+    output$page <- render_page(username = isolate(user_info$username), f = ui_application)
+  })
   
   ## render a different page from application - logout, profile
-  tryCatch({
-    observeEvent(input$application_logout, {
-      output$page <- render_page(message = "You are logged out now!", f = ui_logout)
-      log_session(username = user_info$username, is_in = 0, app_name = app_name)
-      stopApp(returnValue = 1)
-    })
-  }, error = function(err) 0)
+  observeEvent(input$application_logout, {
+    output$page <- render_page(message = "You are logged out now!", f = ui_logout)
+    log_session(username = user_info$username, is_in = 0, app_name = app_name)
+    stopApp(returnValue = 1)
+  })
   
-  tryCatch({
-    observeEvent(input$application_profile, {
-      output$page <- render_page(f = ui_profile)
-    })
-  }, error = function(err) 0)
+  observeEvent(input$application_profile, {
+    output$page <- render_page(f = ui_profile)
+    
+    output$profile_fail <- renderText("")
+    output$profile_success <- renderText("")
+    updateTextInput(session, "profile_username", "User name", user_info$username)
+  })
   
   ########################################################
   ###################### Page Logic ######################
@@ -145,7 +164,7 @@ server <- function(input, output, session) {
     if(password_re == "") output$register_password_re_msg <- renderText("Please enter password again")
     if(app_key == "") output$register_app_key_msg <- renderText("Please enter application key")
     
-    withProgress(message = "Validation", detail = "Credentials are validated...", value = 0, {
+    withProgress(message = "Processing", detail = "Credentials are validated...", value = 0, {
       if(!any(username == "", password == "", password_re == "", app_key == "")) {
         is_registerable <- check_registration_info(username = username, password = NULL, app_key = app_key, app_name = app_name, conn = NULL, to_disconnect = TRUE, verbose = FALSE)
         if(password != password_re) {
@@ -159,11 +178,7 @@ server <- function(input, output, session) {
           if(is_registered) {
             output$register_fail <- renderText("")
             output$register_success <- renderText("Registration succeeded")
-            shinyjs::disable("register_username")
-            shinyjs::disable("register_password")
-            shinyjs::disable("register_password_re")
-            shinyjs::disable("register_app_key")
-            
+
             Sys.sleep(1)
             output$page <- render_page(f = ui_login)
           } else {
@@ -175,39 +190,57 @@ server <- function(input, output, session) {
     })
   })
   
-#   tryCatch({
-#     observeEvent(input$register_register, {
-#       username <- input$register_username
-#       password <- input$register_password
-#       password_re <- input$register_password_re
-#       app_key <- input$register_app_key
-#       
-#       if(username == "") output$register_username_msg <- renderText("Please enter user name")
-#       if(password == "") output$register_password_msg <- renderText("Please enter password")
-#       if(password_re == "") output$register_password_re_msg <- renderText("Please enter password again")
-#       if(app_key == "") output$register_app_key_msg <- renderText("Please enter application key")
-#       
-#       if(!any(username == "", password == "", password_re == "", app_key == "")) {
-#         is_registerable <- check_registration_info(username = username, password = NULL, app_key = app_key, app_name = app_name, conn = NULL, to_disconnect = TRUE, verbose = FALSE)
-#         if(password != password_re) {
-#           output$register_fail <- renderText("Enter same password")
-#         } else if(!is_registerable$app_key_pass) {
-#           output$register_fail <- renderText("App key doesn't match")
-#         } else if(!is_registerable$user_not_found) {
-#           output$register_fail <- renderText("Same user name exists")
-#         } else {
-#           is_registered <- register_user(username = username, password = password, password_re = password_re, app_key = app_key, app_name = app_name, conn = NULL, to_disconnect = TRUE, verbose = FALSE)
-#           if(is_registered) {
-#             output$register_fail <- renderText("")
-#             output$register_success <- renderText("Registration succeeded")
-#           } else {
-#             output$register_success <- renderText("")
-#             output$register_fail <- renderText("Registration failed, try again or contact admin")
-#           }
-#         }
-#       }
-#     })
-#   })
+  ## profile messages
+  observe({
+    if(!is.null(input$profile_password_ch)) {
+      username <- input$profile_username
+      password <- input$profile_password
+      password_new <- input$profile_password_new
+      password_new_re <- input$profile_password_new_re
+      
+      if(username != "") output$profile_username_msg <- renderText("")
+      if(password != "") output$profile_password_msg <- renderText("")
+      if(password_new != "") output$profile_password_new_msg <- renderText("")
+      if(password_new_re != "") output$profile_password_new_re_msg <- renderText("")
+    }
+  })
+  
+  ## profile action
+  observeEvent(input$profile_password_ch, {
+    username <- input$profile_username
+    password <- input$profile_password
+    password_new <- input$profile_password_new
+    password_new_re <- input$profile_password_new_re
+    
+    if(username == "") output$profile_username_msg <- renderText("Please enter user name")
+    if(password == "") output$profile_password_msg <- renderText("Please enter password")
+    if(password_new == "") output$profile_password_new_msg <- renderText("Please enter new password")
+    if(password_new_re == "") output$profile_password_new_re_msg <- renderText("Please enter new password again")
+    
+    withProgress(message = "Processing", detail = "Credentials are validated...", value = 0, {
+      if(!any(username == "", password == "", password_new == "", password_new_re == "")) {
+        db_password <- get_password(username = username, app_name = app_name, conn = NULL, to_disconnect = TRUE, verbose = FALSE)
+        if(!checkpw(password, db_password)) {
+          output$profile_fail <- renderText("Enter correct password")
+        } else if(password_new != password_new_re) {
+          output$profile_fail <- renderText("New passwords don't match")
+        } else {
+          is_password_changed <- change_password(username = username, password_new = password_new, password_new_re = password_new_re, app_name = app_name, conn = NULL, to_disconnect = TRUE, verbose = FALSE)
+          if(is_password_changed) {
+            output$profile_fail <- renderText("")
+            output$profile_success <- renderText("Password change succeeded")
+            
+            updateTextInput(session, "profile_password", "Password", "")
+            updateTextInput(session, "profile_password_new", "New Password", "")
+            updateTextInput(session, "profile_password_new_re", "Re-enter new password", "")
+          } else {
+            output$profile_success <- renderText("")
+            output$profile_fail <- renderText("Password change failed, try again or contact admin")
+          }
+        }
+      }
+    })
+  })
   
   ########################################################
   ################### Application Code ###################

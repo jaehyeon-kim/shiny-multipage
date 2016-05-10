@@ -70,17 +70,26 @@ change_password <- function(username, password, password_new, password_new_re, a
       if(verbose) message(paste("INFO", "User record not deleted or inserted"))
       out <- FALSE
     }
-#     qry_all <- paste("BEGIN TRANSACTION;", qry_delete_user, qry_insert_user,"END TRANSACTION;")
-#     out <- send_query(conn = conn, db_name = "db.sqlite", query = qry_all, to_disconnect = to_disconnect, verbose = verbose)$is_success
-#     if(out) {
-#       out <- TRUE
-#     } else {
-#       if(verbose) message(paste("INFO", "User record fails to be upated"))
-#       out <- FALSE
-#     }
+    #delete/insert not robust, should be within transaction
+    #qry_all <- paste("BEGIN TRANSACTION;", qry_delete_user, qry_insert_user,"END TRANSACTION;")
+    #out <- send_query(conn = conn, db_name = "db.sqlite", query = qry_all, to_disconnect = to_disconnect, verbose = verbose)$is_success
+    #if(out) {
+    #  out <- TRUE
+    #} else {
+    #  if(verbose) message(paste("INFO", "User record fails to be upated"))
+    #  out <- FALSE
+    #}
   } else {
     if(verbose) message(paste("INFO", "New passwords don't match"))
     out <- FALSE
   }
   out
 }
+
+get_password <- function(username, app_name, conn = NULL, to_disconnect = TRUE, verbose = FALSE) {
+  qry_select_pw <- set_select_qry(tbl = "user_info", what = list("password"), filter_list = list(name = username, app_name = app_name))
+  get_query(conn = conn, db_name = "db.sqlite", query = qry_select_pw, to_disconnect = to_disconnect, verbose = verbose)$rs$password
+}
+
+
+
