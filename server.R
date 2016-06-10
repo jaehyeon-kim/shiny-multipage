@@ -2,8 +2,6 @@ init_users()
 
 app_name <- "multipage demo"
 is_logged <- FALSE
-auth_username <- "admin"
-auth_password <- "admin"
 app_key <- "application-key"
 
 render_page <- function(..., f, title = app_name, theme = shinytheme("cerulean")) {
