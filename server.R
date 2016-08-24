@@ -55,15 +55,16 @@ server <- function(input, output, session) {
   ## add profile, application buttons when logged in
   observe({
     if(user_info$is_logged) {
-      shinyjs::disable("login_username")
-      shinyjs::disable("login_password")
-      output$login_more <- renderUI({
-        list(
-          hr(),
-          actionButton("login_profile", "Profile", icon = icon("edit"), width = "100px"),
-          actionButton("login_application", "App", icon = icon("bar-chart"), width = "100px")
-        )
-      })
+      output$page <- render_page(username = isolate(user_info$username), f = ui_application)
+#       shinyjs::disable("login_username")
+#       shinyjs::disable("login_password")
+#       output$login_more <- renderUI({
+#         list(
+#           hr(),
+#           actionButton("login_profile", "Profile", icon = icon("edit"), width = "100px"),
+#           actionButton("login_application", "App", icon = icon("bar-chart"), width = "100px")
+#         )
+#       })
     }
   })
   

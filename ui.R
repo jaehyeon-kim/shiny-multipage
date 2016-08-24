@@ -22,8 +22,8 @@ ui_login <- function(...) {
              actionButton("login_login", "Log in", icon = icon("sign-in"), width = "100px"),
              actionButton("login_register", "Register", icon = icon("user-plus"), width = "100px"),
              br(),
-             div(class = "input_fail", textOutput("login_fail")),
-             uiOutput("login_more")
+             div(class = "input_fail", textOutput("login_fail"))
+             #uiOutput("login_more")
            )
     )
   )
